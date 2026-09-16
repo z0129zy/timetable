@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.课表" parent="android:Theme.Material.Light.NoActionBar">
+        <!-- 冷启动时系统先画 windowBackground，之后才轮到 Compose 的启动页。
+             显式设成暖奶油，与启动页同色，中间不会闪一下别的底色。 -->
+        <item name="android:windowBackground">#FFFBF4E7</item>
+    </style>
+</resources>

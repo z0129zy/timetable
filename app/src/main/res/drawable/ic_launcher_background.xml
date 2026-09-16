@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 自适应图标的背景层。取图标底色 #53A7AD（原图四角均值）。
+     前景是同一块青底 + 居中的日历图案，所以启动器遮罩裁掉的四角与背景同色，接不接得上都看不出来。 -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FF53A7AD" />
+</shape>

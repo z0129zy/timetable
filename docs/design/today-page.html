@@ -1,0 +1,134 @@
+<h2>「今天」页面用哪种布局？</h2>
+<p class="subtitle">全部用真实数据：今天是第 3 周周二，实际只有 2 门课（金工实习 9-16 周、毛泽东思想 9-12 周，本周都不上）</p>
+
+<div class="cards">
+
+  <!-- ============ A ============ -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#f5f5f5">
+      <div style="width:196px;margin:0 auto;border:7px solid #2d2d2d;border-radius:20px;background:#fff;overflow:hidden;font-size:10px;line-height:1.45;color:#222;text-align:left">
+
+        <div style="padding:8px 10px 6px;border-bottom:1px solid #eee">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <b style="font-size:15px">今天</b>
+            <span style="color:#3b6fd4;font-size:9px">第 3 周 · 周二</span>
+          </div>
+          <div style="color:#999;font-size:9px">9月15日</div>
+        </div>
+
+        <div style="padding:8px 10px">
+          <div style="display:flex;gap:7px;opacity:.45">
+            <div style="width:34px;color:#666;font-size:9px;padding-top:1px">08:05<br>09:50</div>
+            <div style="flex:1;border-left:3px solid #bbb;padding:4px 6px;background:#f4f4f4;border-radius:3px">
+              <b>电路★</b><br><span style="color:#666">2-3-301 · 孙伟</span>
+            </div>
+          </div>
+
+          <div style="display:flex;gap:7px;margin-top:8px">
+            <div style="width:34px;color:#3b6fd4;font-size:9px;font-weight:700;padding-top:1px">10:05<br>11:50</div>
+            <div style="flex:1;border-left:3px solid #3b6fd4;padding:4px 6px;background:#eaf1fd;border-radius:3px">
+              <b>大学物理A(2)★</b><br><span style="color:#666">2-3-511 · 吴秀英</span>
+              <div style="color:#3b6fd4;font-size:9px;margin-top:2px">▸ 下一节</div>
+            </div>
+          </div>
+
+          <div style="text-align:center;color:#aaa;font-size:9px;margin-top:12px;padding-top:8px;border-top:1px dashed #e0e0e0">
+            今天没有别的课了
+          </div>
+        </div>
+
+        <div style="display:flex;border-top:1px solid #e5e5e5;background:#fafafa;font-size:9px;text-align:center">
+          <div style="flex:1;padding:6px 0;color:#3b6fd4;font-weight:700">今天</div>
+          <div style="flex:1;padding:6px 0;color:#999">本周</div>
+          <div style="flex:1;padding:6px 0;color:#999">设置</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A. 全天时间轴</h3>
+      <p>今天所有课按时间竖排，已结束的变灰、下一节高亮，一眼看完一整天。</p>
+      <p style="color:#3b6fd4;font-size:12px"><b>推荐</b> —— 信息最全，也不至于太挤</p>
+    </div>
+  </div>
+
+  <!-- ============ B ============ -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#f5f5f5">
+      <div style="width:196px;margin:0 auto;border:7px solid #2d2d2d;border-radius:20px;background:#fff;overflow:hidden;font-size:10px;line-height:1.45;color:#222;text-align:left">
+
+        <div style="padding:8px 10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:baseline">
+          <span style="color:#999;font-size:9px">9月15日</span>
+          <span style="color:#3b6fd4;font-size:9px">第 3 周 · 周二</span>
+        </div>
+
+        <div style="padding:10px;background:#eaf1fd;border-bottom:1px solid #d5e2fa">
+          <div style="color:#3b6fd4;font-size:9px;font-weight:700">下一节</div>
+          <div style="font-size:13px;font-weight:700;margin:2px 0">大学物理A(2)★</div>
+          <div style="font-size:11px"><b>10:05 – 11:50</b></div>
+          <div style="color:#555">2-3-511 · 吴秀英</div>
+          <div style="color:#3b6fd4;font-size:9px;margin-top:3px">⏱ 还有 53 分钟</div>
+        </div>
+
+        <div style="padding:8px 10px">
+          <div style="color:#999;font-size:9px;margin-bottom:5px">今天的课</div>
+          <div style="display:flex;justify-content:space-between;opacity:.45;padding:3px 0">
+            <span>08:05 电路★</span><span style="font-size:9px">已结束</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:3px 0;font-weight:700">
+            <span>10:05 大学物理A(2)★</span>
+          </div>
+        </div>
+
+        <div style="display:flex;border-top:1px solid #e5e5e5;background:#fafafa;font-size:9px;text-align:center">
+          <div style="flex:1;padding:6px 0;color:#3b6fd4;font-weight:700">今天</div>
+          <div style="flex:1;padding:6px 0;color:#999">本周</div>
+          <div style="flex:1;padding:6px 0;color:#999">设置</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B. 下一节优先</h3>
+      <p>上半屏一张大卡专门显示「下一节课」，下半屏才是今天的完整列表。</p>
+      <p style="color:#888;font-size:12px">刚下课想看下一步时最快，但同一节课的信息出现了两次</p>
+    </div>
+  </div>
+
+  <!-- ============ C ============ -->
+  <div class="card" data-choice="c" onclick="toggleSelect(this)">
+    <div class="card-image" style="padding:14px;background:#f5f5f5">
+      <div style="width:196px;margin:0 auto;border:7px solid #2d2d2d;border-radius:20px;background:#fff;overflow:hidden;font-size:10px;line-height:1.45;color:#222;text-align:left">
+
+        <div style="padding:8px 10px;text-align:center;border-bottom:1px solid #eee">
+          <span style="color:#3b6fd4;font-size:9px">第 3 周 · 周二 · 9月15日</span>
+        </div>
+
+        <div style="padding:26px 14px;text-align:center">
+          <div style="font-size:15px;font-weight:700;margin-bottom:6px">大学物理A(2)★</div>
+          <div style="font-size:16px;font-weight:700;color:#3b6fd4;margin-bottom:8px">10:05 – 11:50</div>
+          <div style="color:#555;margin-bottom:4px">2-3-511</div>
+          <div style="color:#555">吴秀英</div>
+          <div style="color:#3b6fd4;font-size:10px;margin-top:12px">⏱ 还有 53 分钟</div>
+        </div>
+
+        <div style="text-align:center;color:#bbb;font-size:9px;padding-bottom:12px">今天共 2 节课</div>
+
+        <div style="display:flex;border-top:1px solid #e5e5e5;background:#fafafa;font-size:9px;text-align:center">
+          <div style="flex:1;padding:6px 0;color:#3b6fd4;font-weight:700">今天</div>
+          <div style="flex:1;padding:6px 0;color:#999">本周</div>
+          <div style="flex:1;padding:6px 0;color:#999">设置</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>C. 极简：只有下一节</h3>
+      <p>整屏就一张卡，大字显示下一节课。够用、够清楚，但看不到今天的全貌。</p>
+      <p style="color:#888;font-size:12px">适合「只想知道下一节去哪」的时候，想规划整天就不够了</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:18px">
+  三个方案我都放了「今天 / 本周 / 设置」三个底部 tab。<br>
+  设置页是留给「作息时间编辑」和「开学日期」的 —— 前面你要求作息时间可点击编辑，得有地方放。
+</p>

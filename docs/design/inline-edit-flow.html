@@ -1,0 +1,170 @@
+<h2>课表页「就地编辑」四步流程</h2>
+<p class="subtitle">所有修改都在课表页完成，不再需要单独的编辑页或作息时间页</p>
+
+<div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px 0">
+
+  <!-- ===== 1 ===== -->
+  <div>
+    <div class="label" style="text-align:center;margin-bottom:5px">① 点有课的格子</div>
+    <div style="width:168px;background:#4a4f58;border-radius:12px;padding:10px 6px">
+      <div style="background:#fff;border-radius:10px;overflow:hidden;font-size:9px;color:#222">
+
+        <div style="padding:8px 10px 6px;border-bottom:1px solid #eee">
+          <div style="font-weight:700;font-size:11px">周一 · 第 5-6 节</div>
+          <div style="color:#888;font-size:8px">14:10 – 15:55 · 共 2 门课</div>
+        </div>
+
+        <div style="padding:8px 10px;background:#eef3fd;border-left:3px solid #3b6fd4">
+          <div style="font-weight:700">大学英语(3)☆</div>
+          <div style="color:#555;font-size:8px;margin-top:2px">1-15周 · 单周</div>
+          <div style="color:#555;font-size:8px">2-2-604 · 王淑芬</div>
+          <div style="margin-top:5px;display:flex;gap:6px">
+            <span style="border:1px solid #3b6fd4;color:#3b6fd4;border-radius:4px;padding:1px 8px;font-size:8px">编辑</span>
+            <span style="border:1px solid #ccc;color:#888;border-radius:4px;padding:1px 8px;font-size:8px">删除</span>
+          </div>
+        </div>
+
+        <div style="padding:8px 10px;border-left:3px solid #ddd">
+          <div style="font-weight:700;color:#555">概率论与数理统计B★</div>
+          <div style="color:#777;font-size:8px;margin-top:2px">2-16周 · 双周</div>
+          <div style="color:#777;font-size:8px">2-3-411 · 陈建国</div>
+          <div style="margin-top:5px;display:flex;gap:6px">
+            <span style="border:1px solid #ccc;color:#888;border-radius:4px;padding:1px 8px;font-size:8px">编辑</span>
+            <span style="border:1px solid #ccc;color:#888;border-radius:4px;padding:1px 8px;font-size:8px">删除</span>
+          </div>
+        </div>
+
+        <div style="padding:8px 10px;color:#3b6fd4;font-size:9px;border-top:1px solid #f0f0f0">＋ 在这个时段加一门课</div>
+        <div style="padding:7px;text-align:center;color:#888;font-size:9px;border-top:1px solid #eee">关闭</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 2 ===== -->
+  <div>
+    <div class="label" style="text-align:center;margin-bottom:5px">② 点「编辑」</div>
+    <div style="width:168px;background:#4a4f58;border-radius:12px;padding:10px 6px">
+      <div style="background:#fff;border-radius:10px;overflow:hidden;font-size:9px;color:#222">
+
+        <div style="padding:8px 10px;font-weight:700;font-size:11px;border-bottom:1px solid #eee">编辑课程</div>
+
+        <div style="padding:8px 10px;line-height:1.9">
+          <div style="color:#888;font-size:8px">课程名称</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px">大学英语(3)</div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">课程周期</div>
+          <div style="display:flex;gap:3px;align-items:center">
+            第<input value="1" style="width:22px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">周
+            到 第<input value="15" style="width:22px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">周
+          </div>
+          <div style="margin-top:3px;display:flex;gap:8px;font-size:8px">
+            <span style="color:#999">○ 每周</span><span style="color:#3b6fd4">● 单周</span><span style="color:#999">○ 双周</span>
+          </div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">课程节数</div>
+          <div style="display:flex;gap:3px;align-items:center">
+            <span style="border:1px solid #ddd;border-radius:3px;padding:1px 5px">周一 ▾</span>
+            <span>第</span><input value="5" style="width:20px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">
+            <span>–</span><input value="6" style="width:20px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px"><span>节</span>
+          </div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">教室地点</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px">2-2-604</div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">任课老师</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px">王淑芬</div>
+        </div>
+
+        <div style="display:flex;border-top:1px solid #eee">
+          <div style="flex:1;padding:7px;text-align:center;color:#888;font-size:9px">取消</div>
+          <div style="flex:1;padding:7px;text-align:center;color:#3b6fd4;font-weight:700;font-size:9px">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 3 ===== -->
+  <div>
+    <div class="label" style="text-align:center;margin-bottom:5px">③ 点空白格子</div>
+    <div style="width:168px;background:#4a4f58;border-radius:12px;padding:10px 6px">
+      <div style="background:#fff;border-radius:10px;overflow:hidden;font-size:9px;color:#222">
+
+        <div style="padding:8px 10px;font-weight:700;font-size:11px;border-bottom:1px solid #eee">
+          新增课程
+          <div style="font-weight:400;color:#888;font-size:8px;margin-top:2px">周三 · 第 5-6 节（已预填）</div>
+        </div>
+
+        <div style="padding:8px 10px;line-height:1.9">
+          <div style="color:#888;font-size:8px">课程名称</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px;color:#ccc">必填</div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">课程周期</div>
+          <div style="display:flex;gap:3px;align-items:center">
+            第<input value="1" style="width:22px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">周
+            到 第<input value="16" style="width:22px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">周
+          </div>
+          <div style="margin-top:3px;display:flex;gap:8px;font-size:8px">
+            <span style="color:#3b6fd4">● 每周</span><span style="color:#999">○ 单周</span><span style="color:#999">○ 双周</span>
+          </div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">课程节数</div>
+          <div style="display:flex;gap:3px;align-items:center">
+            <span style="border:1px solid #ddd;border-radius:3px;padding:1px 5px;background:#f5f8ff">周三 ▾</span>
+            <span>第</span><input value="5" style="width:20px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px">
+            <span>–</span><input value="6" style="width:20px;border:1px solid #ddd;border-radius:3px;text-align:center;font-size:9px"><span>节</span>
+          </div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">教室地点</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px;color:#ccc">选填</div>
+
+          <div style="color:#888;font-size:8px;margin-top:6px">任课老师</div>
+          <div style="border:1px solid #ddd;border-radius:4px;padding:2px 6px;color:#ccc">选填</div>
+        </div>
+
+        <div style="display:flex;border-top:1px solid #eee">
+          <div style="flex:1;padding:7px;text-align:center;color:#888;font-size:9px">取消</div>
+          <div style="flex:1;padding:7px;text-align:center;color:#3b6fd4;font-weight:700;font-size:9px">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== 4 ===== -->
+  <div>
+    <div class="label" style="text-align:center;margin-bottom:5px">④ 点左侧时间栏</div>
+    <div style="width:168px;background:#4a4f58;border-radius:12px;padding:10px 6px">
+      <div style="background:#fff;border-radius:10px;overflow:hidden;font-size:9px;color:#222">
+
+        <div style="padding:8px 10px;font-weight:700;font-size:11px;border-bottom:1px solid #eee">
+          修改上课时间
+          <div style="font-weight:400;color:#888;font-size:8px;margin-top:2px">第 1 节</div>
+        </div>
+
+        <div style="padding:12px 10px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="color:#666">开始</span>
+            <span style="border:1px solid #ddd;border-radius:4px;padding:3px 10px;font-weight:700;font-size:11px">08:05</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+            <span style="color:#666">结束</span>
+            <span style="border:1px solid #ddd;border-radius:4px;padding:3px 10px;font-weight:700;font-size:11px">08:55</span>
+          </div>
+          <div style="color:#999;font-size:8px;margin-top:12px;padding-top:8px;border-top:1px dashed #eee;line-height:1.5">
+            改这里会影响所有用到第 1 节的课，不会改动课程本身。
+          </div>
+        </div>
+
+        <div style="display:flex;border-top:1px solid #eee">
+          <div style="flex:1;padding:7px;text-align:center;color:#888;font-size:9px">取消</div>
+          <div style="flex:1;padding:7px;text-align:center;color:#3b6fd4;font-weight:700;font-size:9px">保存</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:14px">
+  四个弹窗都在课表页原地弹出，不跳转页面。<br>
+  作息时间也从「设置」移到了课表页 —— 直接点左边那列时间就行。
+</p>
