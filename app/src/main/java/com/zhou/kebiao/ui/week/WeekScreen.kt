@@ -114,6 +114,7 @@ fun WeekScreen(state: AppState, onRequestImport: () -> Unit) {
             WeekGrid(
                 timetable = timetable,
                 week = animatedWeek,
+                rowHeight = state.gridRowHeightDp.dp,
                 onSlotClick = { edit = EditRequest.SlotPick(it) },
                 onEmptyCellClick = { day, period ->
                     edit = EditRequest.Form(

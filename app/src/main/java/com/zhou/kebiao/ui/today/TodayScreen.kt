@@ -200,7 +200,7 @@ private fun TodayRow(
     val end = periods.endOf(course.endPeriod)?.let(::hhmm) ?: "—"
     // 卡片底用课程自己的浅色，左侧色条用同色系的深色 ——
     //「浅底 + 深色条」是这一版卡片的基本结构。
-    val tone = courseTone(course.name)
+    val tone = courseTone(course)
     val bar = when {
         isNext -> SemanticBlue
         // 已结束的不再显示课程色：整块退成中性，视觉上「退到后面去」
@@ -212,6 +212,8 @@ private fun TodayRow(
         ended -> PastCourseFill
         else -> tone.fill
     }
+    val contentColor = if (isNext || ended) InkPrimary else tone.onFill
+    val subColor = if (isNext || ended) InkSecondary else tone.onFill
 
     Row(
         modifier = Modifier
@@ -254,14 +256,14 @@ private fun TodayRow(
         ) {
             Box(Modifier.width(4.dp).fillMaxHeight().background(bar))
             Column(Modifier.padding(horizontal = 10.dp, vertical = 8.dp)) {
-                Text(course.name, style = TextItem, color = InkPrimary)
+                Text(course.name, style = TextItem, color = contentColor)
                 Text(
                     text = buildString {
                         append("@").append(course.location.ifBlank { "未排地点" })
                         if (course.teacher.isNotBlank()) append(" · ").append(course.teacher)
                     },
                     style = TextCaption,
-                    color = InkSecondary,
+                    color = subColor,
                 )
                 if (isNext) {
                     Text("▸ 下一节", style = TextCaption, color = SemanticBlue)

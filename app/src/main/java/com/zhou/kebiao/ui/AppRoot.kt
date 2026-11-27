@@ -1,19 +1,22 @@
 package com.zhou.kebiao.ui
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.DateRange
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material3.AlertDialog
@@ -26,6 +29,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,9 +39,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.core.content.ContextCompat
 import com.zhou.kebiao.data.TimetableStore
+import com.zhou.kebiao.notify.ClassReminder
 import com.zhou.kebiao.ui.settings.SettingsScreen
 import com.zhou.kebiao.ui.theme.TextCaption
 import com.zhou.kebiao.ui.theme.CoralDeep
@@ -48,8 +57,11 @@ import com.zhou.kebiao.ui.theme.InkPrimary
 import com.zhou.kebiao.ui.theme.InkTertiary
 import com.zhou.kebiao.ui.theme.NavBarSurface
 import com.zhou.kebiao.ui.today.TodayScreen
+import com.zhou.kebiao.ui.web.WebImportScreen
 import com.zhou.kebiao.ui.week.WeekScreen
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 private const val TAB_TODAY = 0
@@ -72,14 +84,44 @@ fun AppRoot() {
     }
     val scope = rememberCoroutineScope()
     var tab by rememberSaveable { mutableIntStateOf(TAB_TODAY) }
-    // 只在真正冷启动时露一次：转屏或从后台回来不该再放一遍。
-    // rememberSaveable 正好做到这点 —— 转屏后恢复成 false。
-    var showSplash by rememberSaveable { mutableStateOf(true) }
 
     val picker = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         if (uri != null) scope.launch { state.importPdf(uri) }
+    }
+
+    var showImportChooser by rememberSaveable { mutableStateOf(false) }
+    var showWebImport by rememberSaveable { mutableStateOf(false) }
+
+    // 提醒默认是开的：首次启动请求一次通知权限；拒绝就把开关关掉，
+    // 别让「设置里显示开着、实际收不到」这种事发生。
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        if (!granted) state.setClassReminder(false)
+    }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            state.classReminderEnabled &&
+            ContextCompat.checkSelfPermission(
+                context, Manifest.permission.POST_NOTIFICATIONS
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    // 课表、开关任一变化就重排整学期的提醒；关掉则全部取消。
+    // 排几百个闹钟是 IPC 操作，放 IO 线程，别卡首帧。
+    LaunchedEffect(state.timetable, state.classReminderEnabled) {
+        withContext(Dispatchers.IO) {
+            if (state.classReminderEnabled) {
+                ClassReminder.reschedule(context.applicationContext, state.timetable)
+            } else {
+                ClassReminder.cancelAll(context.applicationContext)
+            }
+        }
     }
 
     Scaffold(
@@ -116,7 +158,7 @@ fun AppRoot() {
                 TAB_TODAY -> TodayScreen(state)
                 TAB_WEEK -> WeekScreen(
                     state = state,
-                    onRequestImport = { picker.launch(arrayOf("application/pdf")) },
+                    onRequestImport = { showImportChooser = true },
                 )
                 else -> SettingsScreen(state)
             }
@@ -142,13 +184,50 @@ fun AppRoot() {
         }
     }
 
-    // 启动页叠在界面之上淡出。底下那层这期间已经组合完了，所以淡出之后立刻就是可用界面，
-    // 不会先白一下再画出来。
-    AnimatedVisibility(
-        visible = showSplash,
-        exit = fadeOut(tween(durationMillis = 420)),
-    ) {
-        SplashScreen(onFinished = { showSplash = false })
+    if (showImportChooser) {
+        AlertDialog(
+            shape = RoundedCornerShape(RadiusPanel),
+            onDismissRequest = { showImportChooser = false },
+            title = { Text("导入课表") },
+            text = {
+                Column {
+                    Text("从教务系统导入：登录后直接读取课表，不用下载 PDF。")
+                    Spacer(Modifier.height(6.dp))
+                    Text("选择本地 PDF：导入已经下载好的课表文件。")
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showImportChooser = false
+                    showWebImport = true
+                }) {
+                    Text("从教务系统导入")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showImportChooser = false
+                    picker.launch(arrayOf("application/pdf"))
+                }) {
+                    Text("选择本地 PDF")
+                }
+            },
+        )
+    }
+
+    if (showWebImport) {
+        // 用全屏 Dialog 而不是普通叠层：独立窗口能保证 WebView 上的按钮不会被下层页面抢走触摸
+        Dialog(
+            onDismissRequest = { showWebImport = false },
+            properties = DialogProperties(
+                usePlatformDefaultWidth = false,
+                dismissOnBackPress = false,
+                dismissOnClickOutside = false,
+                decorFitsSystemWindows = false,
+            ),
+        ) {
+            WebImportScreen(state = state, onClose = { showWebImport = false })
+        }
     }
 
     state.importError?.let { reason ->

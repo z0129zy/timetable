@@ -56,6 +56,7 @@ fun CourseEditHost(
                 }
             },
             onDelete = { index -> onRequestChange(EditRequest.ConfirmDelete(index, request)) },
+            onColor = { index, color -> state.setCourseColor(index, color) },
             onAddHere = {
                 onRequestChange(
                     EditRequest.Form(

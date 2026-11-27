@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.zhou.kebiao.data.Course
 import com.zhou.kebiao.data.PeriodTime
@@ -50,9 +51,6 @@ const val PERIOD_COUNT = 11
 /** 左侧时间栏宽度。 */
 val TIME_COLUMN_WIDTH = 34.dp
 
-/** 每一节的行高 —— 放得下折成 5 行的长课名。 */
-val ROW_HEIGHT = 77.dp
-
 /**
  * 课表网格：左侧 11 节的时间栏 + 7 天。
  *
@@ -70,6 +68,8 @@ val ROW_HEIGHT = 77.dp
 fun WeekGrid(
     timetable: Timetable,
     week: Int,
+    /** 每节的行高。设置页可调，越小一屏放下的课越多。 */
+    rowHeight: Dp,
     onSlotClick: (Slot) -> Unit,
     onEmptyCellClick: (day: Int, period: Int) -> Unit,
     onPeriodClick: (period: Int) -> Unit,
@@ -85,12 +85,12 @@ fun WeekGrid(
             .drawBehind {
                 // 每一节之间的横线画在最底层，不参与布局
                 for (i in 1..PERIOD_COUNT) {
-                    val y = ROW_HEIGHT.toPx() * i
+                    val y = rowHeight.toPx() * i
                     drawLine(RowLine, Offset(0f, y), Offset(size.width, y), strokeWidth = 1f)
                 }
             }
     ) {
-        TimeColumn(timetable.periods, onPeriodClick)
+        TimeColumn(timetable.periods, rowHeight, onPeriodClick)
         for (day in 1..7) {
             DayColumn(
                 modifier = Modifier.weight(1f),
@@ -98,6 +98,7 @@ fun WeekGrid(
                 week = week,
                 timetable = timetable,
                 slots = slots,
+                rowHeight = rowHeight,
                 onSlotClick = onSlotClick,
                 onEmptyCellClick = onEmptyCellClick,
             )
@@ -106,13 +107,17 @@ fun WeekGrid(
 }
 
 @Composable
-private fun TimeColumn(periods: List<PeriodTime>, onPeriodClick: (Int) -> Unit) {
+private fun TimeColumn(
+    periods: List<PeriodTime>,
+    rowHeight: Dp,
+    onPeriodClick: (Int) -> Unit,
+) {
     Column(Modifier.width(TIME_COLUMN_WIDTH)) {
         for (period in 1..PERIOD_COUNT) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(ROW_HEIGHT)
+                    .height(rowHeight)
                     .clickable { onPeriodClick(period) },
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
@@ -141,16 +146,17 @@ private fun DayColumn(
     week: Int,
     timetable: Timetable,
     slots: Map<Pair<Int, Int>, Slot>,
+    rowHeight: Dp,
     onSlotClick: (Slot) -> Unit,
     onEmptyCellClick: (Int, Int) -> Unit,
 ) {
-    Box(modifier.height(ROW_HEIGHT * PERIOD_COUNT)) {
+    Box(modifier.height(rowHeight * PERIOD_COUNT)) {
         Column(Modifier.fillMaxSize()) {
             for (period in 1..PERIOD_COUNT) {
                 Box(
                     Modifier
                         .fillMaxWidth()
-                        .height(ROW_HEIGHT)
+                        .height(rowHeight)
                         .clickable { onEmptyCellClick(day, period) }
                 )
             }
@@ -165,9 +171,9 @@ private fun DayColumn(
                     week = week,
                     onClick = { onSlotClick(slot) },
                     modifier = Modifier
-                        .offset(y = ROW_HEIGHT * (slot.startPeriod - 1))
+                        .offset(y = rowHeight * (slot.startPeriod - 1))
                         .fillMaxWidth()
-                        .height(ROW_HEIGHT * (slot.endPeriod - slot.startPeriod + 1))
+                        .height(rowHeight * (slot.endPeriod - slot.startPeriod + 1))
                         .padding(1.dp),
                 )
             }
@@ -183,7 +189,9 @@ private fun SlotCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val tone = courseTone(course)
     val active = course.isActiveIn(week)
+    val contentColor = if (active) tone.onFill else InkPrimary
     val (name, symbol) = splitTypeSymbol(course.name)
     val sub = buildString {
         append(symbol)
@@ -194,7 +202,7 @@ private fun SlotCard(
         modifier = modifier
             // 网格用小圆角、无投影：一列只有约 49dp，大圆角会吃掉可写宽度
             .clip(RoundedCornerShape(RadiusChip))
-            .background(if (active) courseTone(course.name).fill else InactiveCourseFill)
+            .background(if (active) tone.fill else InactiveCourseFill)
             .clickable(onClick = onClick)
             .padding(3.dp),
     ) {
@@ -205,9 +213,9 @@ private fun SlotCard(
                 Text("非本周", style = TextMicro, color = InactiveCourseText)
                 Spacer(Modifier.height(2.dp))
             }
-            Text(name, style = TextMicroStrong, color = InkPrimary)
+            Text(name, style = TextMicroStrong, color = contentColor)
             if (sub.isNotEmpty()) {
-                Text(sub, style = TextMicro, color = InkPrimary)
+                Text(sub, style = TextMicro, color = contentColor)
             }
         }
 

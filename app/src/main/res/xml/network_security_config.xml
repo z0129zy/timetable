@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  学校这几个站点至今只有 http，全局放开明文太宽；只对学校域名和教务系统 IP 放行。
+  其余域名仍要求 https。
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false" />
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">xust.edu.cn</domain>
+        <domain includeSubdomains="false">59.74.174.150</domain>
+    </domain-config>
+</network-security-config>

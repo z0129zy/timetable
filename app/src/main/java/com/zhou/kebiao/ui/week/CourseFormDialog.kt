@@ -11,9 +11,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -55,6 +57,7 @@ import com.zhou.kebiao.ui.theme.InkSecondary
 import com.zhou.kebiao.ui.theme.InkTertiary
 import com.zhou.kebiao.ui.theme.MissingFieldBackground
 import com.zhou.kebiao.ui.theme.MissingFieldBorder
+import com.zhou.kebiao.ui.theme.courseTone
 
 /**
  * 新增与编辑共用的一张 5 字段表单（设计文档 §7.5）。
@@ -82,6 +85,8 @@ fun CourseFormDialog(
     var endPeriod by remember(initial) { mutableStateOf(initial.endPeriod.toString()) }
     var location by remember(initial) { mutableStateOf(initial.location) }
     var teacher by remember(initial) { mutableStateOf(initial.teacher) }
+    var customColor by remember(initial) { mutableStateOf(initial.customColor) }
+    var showColorPicker by remember { mutableStateOf(false) }
     var dayMenuOpen by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
 
@@ -112,6 +117,7 @@ fun CourseFormDialog(
             teacher = teacher.trim(),
             // 用户已经在表单里过目并确认过这些值，兜底标记到此清掉（设计文档 §5.5）
             missingFields = emptySet(),
+            customColor = customColor,
         )
         val problem = validateCourse(course, timetable.totalWeeks)
         if (problem == null) onSave(course) else error = problem
@@ -154,6 +160,32 @@ fun CourseFormDialog(
                             onClick = { weekType = type },
                             modifier = Modifier.weight(1f),
                         )
+                    }
+                }
+
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("高亮颜色", style = TextCaption, color = InkTertiary)
+                    Spacer(Modifier.width(6.dp))
+                    Box(
+                        Modifier
+                            .size(16.dp)
+                            .clip(CircleShape)
+                            .background(courseTone(name, customColor).fill)
+                            .border(1.dp, DividerLine, CircleShape)
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(
+                        text = "自定义高亮颜色",
+                        style = TextCaption,
+                        color = SemanticBlue,
+                        modifier = Modifier
+                            .clickable { showColorPicker = true }
+                            .padding(vertical = 2.dp),
+                    )
+                    if (customColor == null) {
+                        Spacer(Modifier.width(4.dp))
+                        Text("自动", style = TextCaption, color = InkTertiary)
                     }
                 }
 
@@ -227,6 +259,18 @@ fun CourseFormDialog(
             TextButton(onClick = onDismiss) { Text("取消", style = TextBodySmall, color = InkTertiary) }
         },
     )
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            current = customColor,
+            previewName = name.ifBlank { "课程名" },
+            onPick = { color ->
+                customColor = color
+                showColorPicker = false
+            },
+            onDismiss = { showColorPicker = false },
+        )
+    }
 }
 
 /**

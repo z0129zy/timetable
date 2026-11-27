@@ -30,6 +30,8 @@ data class Course(
      * 兜底值与用户手填的值长得一样（都是空串或 1），不记下来界面就没法标黄。
      */
     val missingFields: Set<CourseField> = emptySet(),
+    /** 用户自定义的高亮色（ARGB）。null = 按课程名自动取色。 */
+    val customColor: Int? = null,
 )
 
 /** 其他课程。无星期与节次，故不能并入 Course。 */

@@ -1,6 +1,7 @@
 package com.zhou.kebiao.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import com.zhou.kebiao.data.Course
 
 // ── 方向：暖奶油 · 哑光低饱和 ────────────────────────────────────────────
 // 色值取自 docs/design/ 里选定的概念图（逐像素实测），不是估出来的。
@@ -66,12 +67,24 @@ val NextCourseFill = Color(0xFFCFDEEA)
 /** 置灰态、已经上完的课。 */
 val PastCourseFill = Color(0xFFE5E1D8)
 
-// ── 课程色：8 对（浅底 + 深条）──
+// ── 课程色：7 对（浅底 + 深条）──
 // 全部实测过：深墨正文压在每个 fill 上都有 11.4–12.5 的对比，远超 4.5；
 // 每个 bar 相对基底也都有 2.4–3.4，作为色条看得清。
+//
+// 不要加回中性暖灰：它原来的 fill 与非本周的 #E5E1D8 完全同色，
+// 于是像「形势与政策（3）★」这样散列到它的课，本周明明有课，
+// 卡片却和灰掉的「非本周」一模一样，看上去像没生效。
+// ColorsTest 有一条测试守着这个不变量。
 
-/** 一门课在界面上的两个色：卡片底 [fill] 与左侧色条 [bar]。 */
-data class CourseTone(val fill: Color, val bar: Color)
+/**
+ * 一门课在界面上的三个色：卡片底 [fill]、左侧色条 [bar] 与压在 [fill] 上的文字色 [onFill]。
+ * 预设色都是浅底，默认深墨字；自定义色若是品牌深色，会自动换成白字。
+ */
+data class CourseTone(
+    val fill: Color,
+    val bar: Color,
+    val onFill: Color = InkPrimary,
+)
 
 val CourseTones = listOf(
     CourseTone(Color(0xFFCFDFEA), Color(0xFF6E93AE)),   // 哑光蓝
@@ -81,15 +94,64 @@ val CourseTones = listOf(
     CourseTone(Color(0xFFD8E0CF), Color(0xFF82956F)),   // 鼠尾草
     CourseTone(Color(0xFFEAE0C9), Color(0xFFB39A62)),   // 沙
     CourseTone(Color(0xFFDCD6E6), Color(0xFF8B7FA8)),   // 藕荷
-    CourseTone(Color(0xFFE5E1D8), Color(0xFF9A9689)),   // 暖灰
+)
+
+/** 推荐色：DeepSeek / Claude 用官方品牌主色，雾粉是自定义的浅粉。 */
+data class RecommendedColor(val name: String, val argb: Int)
+
+val RecommendedHighlightColors = listOf(
+    RecommendedColor("DeepSeek 蓝", 0xFF4D6BFE.toInt()),
+    RecommendedColor("Claude 橙", 0xFFD97757.toInt()),
+    RecommendedColor("雾粉", 0xFFF0D5E0.toInt()),
 )
 
 /**
- * 同一门课在任何位置都是同一个色：按课程名散列取。
+ * 取课的色调：用户自定义优先；否则按课程名散列。
  * 用 floorMod 而不是 abs —— abs(Int.MIN_VALUE) 仍是负数，会越界。
  */
-fun courseTone(name: String): CourseTone =
-    CourseTones[Math.floorMod(name.hashCode(), CourseTones.size)]
+fun courseTone(name: String, customColor: Int? = null): CourseTone {
+    if (customColor != null) {
+        val fill = Color(customColor)
+        return CourseTone(fill, barFor(fill), onFillFor(fill))
+    }
+    return CourseTones[Math.floorMod(name.hashCode(), CourseTones.size)]
+}
+
+fun courseTone(course: Course): CourseTone = courseTone(course.name, course.customColor)
+
+/** 自定义色没有预置的深色条，就把它压暗当条用。 */
+private fun barFor(fill: Color): Color = Color(
+    red = (fill.red * 0.55f).coerceIn(0f, 1f),
+    green = (fill.green * 0.55f).coerceIn(0f, 1f),
+    blue = (fill.blue * 0.55f).coerceIn(0f, 1f),
+    alpha = 1f,
+)
+
+/** 深墨字与白字，哪个在这个底色上对比度更高就用哪个。 */
+private fun onFillFor(fill: Color): Color =
+    if (contrastRatio(fill, Color.White) > contrastRatio(fill, InkPrimary)) {
+        Color.White
+    } else {
+        InkPrimary
+    }
+
+private fun contrastRatio(a: Color, b: Color): Float {
+    val la = relativeLuminance(a)
+    val lb = relativeLuminance(b)
+    return (maxOf(la, lb) + 0.05f) / (minOf(la, lb) + 0.05f)
+}
+
+private fun relativeLuminance(color: Color): Float {
+    fun channel(value: Float): Float =
+        if (value <= 0.04045f) {
+            value / 12.92f
+        } else {
+            Math.pow(((value + 0.055f) / 1.055f).toDouble(), 2.4).toFloat()
+        }
+    return 0.2126f * channel(color.red) +
+        0.7152f * channel(color.green) +
+        0.0722f * channel(color.blue)
+}
 
 // ── 状态 ──
 

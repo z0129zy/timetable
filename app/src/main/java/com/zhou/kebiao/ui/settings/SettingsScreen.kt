@@ -1,4 +1,13 @@
 package com.zhou.kebiao.ui.settings
+import android.Manifest
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.Switch
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 
@@ -21,6 +30,8 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -33,7 +44,10 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.zhou.kebiao.ui.AppState
+import com.zhou.kebiao.ui.UiPrefs
 import com.zhou.kebiao.ui.theme.TextTitle
 import com.zhou.kebiao.ui.theme.TextBodySmall
 import com.zhou.kebiao.ui.theme.TextCaption
@@ -52,16 +66,24 @@ import com.zhou.kebiao.ui.theme.InkPrimary
 import com.zhou.kebiao.ui.theme.InkTertiary
 import com.zhou.kebiao.ui.theme.RowLine
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 /**
- * 设置页（设计文档 §7.7）：只有学期级的三样东西能改。
+ * 设置页（设计文档 §7.7）：学期级的三样东西 + 课表显示密度。
  * 导入入口不在这里（在课表页顶栏），作息时间也不在这里（课表页点左侧时间栏）。
  */
 @Composable
 fun SettingsScreen(state: AppState) {
     val timetable = state.timetable
     var editing by remember { mutableStateOf<SettingField?>(null) }
-    var showAboutDeveloper by remember { mutableStateOf(false) }
+
+    val context = LocalContext.current
+    val notificationsAllowed = NotificationManagerCompat.from(context).areNotificationsEnabled()
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        state.setClassReminder(granted)
+    }
 
     Column(Modifier.fillMaxSize().background(Canvas).verticalScroll(rememberScrollState())) {
         SettingGroup("学期") {
@@ -76,20 +98,91 @@ fun SettingsScreen(state: AppState) {
             }
         }
 
+        SettingGroup("课表显示") {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("课表行高", style = TextItem, color = InkPrimary)
+                    Spacer(Modifier.weight(1f))
+                    Text(
+                        text = "${state.gridRowHeightDp} dp",
+                        style = TextItem.copy(fontWeight = FontWeight.Normal),
+                        color = SemanticBlue,
+                    )
+                }
+                Slider(
+                    value = state.gridRowHeightDp.toFloat(),
+                    onValueChange = { state.setGridRowHeight(it.roundToInt()) },
+                    valueRange = UiPrefs.MIN_GRID_ROW_HEIGHT_DP.toFloat()..
+                        UiPrefs.MAX_GRID_ROW_HEIGHT_DP.toFloat(),
+                    steps = (UiPrefs.MAX_GRID_ROW_HEIGHT_DP - UiPrefs.MIN_GRID_ROW_HEIGHT_DP) /
+                        UiPrefs.GRID_ROW_HEIGHT_STEP_DP - 1,
+                    colors = SliderDefaults.colors(
+                        thumbColor = SemanticBlue,
+                        activeTrackColor = SemanticBlue,
+                        inactiveTrackColor = DividerLine,
+                    ),
+                )
+                Text(
+                    text = "调小后一屏能多看几节；调大卡片更宽松",
+                    style = TextCaption,
+                    color = InkTertiary,
+                )
+            }
+        }
+
+        SettingGroup("提醒") {
+            Column(Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 10.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text("上课前 12 分钟提醒", style = TextItem, color = InkPrimary)
+                        Text(
+                            "用系统通知提醒课程、时间与地点",
+                            style = TextCaption,
+                            color = InkTertiary,
+                        )
+                    }
+                    Switch(
+                        checked = state.classReminderEnabled,
+                        onCheckedChange = { next ->
+                            when {
+                                !next -> state.setClassReminder(false)
+
+                                Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                    ContextCompat.checkSelfPermission(
+                                        context, Manifest.permission.POST_NOTIFICATIONS
+                                    ) != PackageManager.PERMISSION_GRANTED ->
+                                    notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+
+                                else -> state.setClassReminder(true)
+                            }
+                        },
+                    )
+                }
+                if (state.classReminderEnabled && !notificationsAllowed) {
+                    Text(
+                        text = "系统通知被关掉了，提醒不会出现。点这里去打开",
+                        style = TextCaption,
+                        color = ErrorRed,
+                        modifier = Modifier
+                            .padding(top = 6.dp)
+                            .clickable {
+                                context.startActivity(
+                                    Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+                                        .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                )
+                            },
+                    )
+                }
+            }
+        }
+
         SettingGroup("关于") {
             SettingRow("课程数据", "只存在本机，不上传", editable = false) {}
             // 这两行的右侧写成「去…」而不是「在…」，读起来才是指路而不是动作 ——
             // 否则用户会去点一行点了没反应的「导入课表」
             SettingRow("导入课表", "去「课表」页点右上角的 ＋", editable = false) {}
-            SettingRow("编辑作息时间", "去「课表」页点左侧时间栏", editable = false) {}
-            SettingRow("关于开发者", "感谢你的支持", editable = true, last = true) {
-                showAboutDeveloper = true
-            }
+            SettingRow("编辑作息时间", "去「课表」页点左侧时间栏", editable = false, last = true) {}
         }
-    }
-
-    if (showAboutDeveloper) {
-        AboutDeveloperDialog(onDismiss = { showAboutDeveloper = false })
     }
 
     when (editing) {

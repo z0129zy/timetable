@@ -11,13 +11,20 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -37,6 +44,7 @@ import com.zhou.kebiao.ui.theme.InkDisabled
 import com.zhou.kebiao.ui.theme.InkSecondary
 import com.zhou.kebiao.ui.theme.InkTertiary
 import com.zhou.kebiao.ui.theme.NextCourseFill
+import com.zhou.kebiao.ui.theme.courseTone
 
 /**
  * 点有课的格子弹出的候选课弹窗（设计文档 §7.3）。
@@ -56,10 +64,12 @@ fun CandidateDialog(
     onDismiss: () -> Unit,
     onEdit: (courseIndex: Int) -> Unit,
     onDelete: (courseIndex: Int) -> Unit,
+    onColor: (courseIndex: Int, color: Int?) -> Unit,
     onAddHere: () -> Unit,
 ) {
     val candidates: List<Pair<Int, Course>> = slot.courseIndexes
         .mapNotNull { index -> timetable.courses.getOrNull(index)?.let { index to it } }
+    var colorPickFor by remember { mutableStateOf<Int?>(null) }
 
     val defaultPeriods = timetable.periods
     val from = defaultPeriods.startOf(slot.startPeriod)?.let(::hhmm)
@@ -95,6 +105,7 @@ fun CandidateDialog(
                         active = course.isActiveIn(week),
                         onEdit = { onEdit(index) },
                         onDelete = { onDelete(index) },
+                        onColor = { colorPickFor = index },
                     )
                 }
                 Spacer(Modifier.height(6.dp))
@@ -113,6 +124,21 @@ fun CandidateDialog(
             TextButton(onClick = onDismiss) { Text("关闭", style = TextCaption, color = InkTertiary) }
         },
     )
+
+    colorPickFor?.let { index ->
+        val course = timetable.courses.getOrNull(index)
+        if (course != null) {
+            ColorPickerDialog(
+                current = course.customColor,
+                previewName = course.name,
+                onPick = { color ->
+                    onColor(index, color)
+                    colorPickFor = null
+                },
+                onDismiss = { colorPickFor = null },
+            )
+        }
+    }
 }
 
 @Composable
@@ -121,6 +147,7 @@ private fun CandidateRow(
     active: Boolean,
     onEdit: () -> Unit,
     onDelete: () -> Unit,
+    onColor: () -> Unit,
 ) {
     Row(
         modifier = Modifier
@@ -161,6 +188,26 @@ private fun CandidateRow(
                 style = TextCaption,
                 color = if (active) SemanticBlue else InkTertiary,
             )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(top = 2.dp),
+            ) {
+                Box(
+                    Modifier
+                        .size(9.dp)
+                        .clip(CircleShape)
+                        .background(courseTone(course).fill)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    text = "自定义高亮颜色",
+                    style = TextCaption,
+                    color = SemanticBlue,
+                    modifier = Modifier
+                        .clickable(onClick = onColor)
+                        .padding(vertical = 2.dp),
+                )
+            }
         }
         Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
             OutlinedButton(onClick = onEdit, contentPadding = PaddingValues(horizontal = 6.dp, vertical = 0.dp)) {

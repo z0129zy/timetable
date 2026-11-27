@@ -2,6 +2,7 @@ package com.zhou.kebiao.ui
 
 import android.content.Context
 import android.net.Uri
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import com.zhou.kebiao.data.withFirstMonday
 import com.zhou.kebiao.data.withPeriodTime
 import com.zhou.kebiao.data.withSemesterName
 import com.zhou.kebiao.data.withTotalWeeks
+import com.zhou.kebiao.parser.ParseResult
 import com.zhou.kebiao.parser.PdfTextExtractor
 import com.zhou.kebiao.parser.TimetableParser
 import kotlinx.coroutines.CancellationException
@@ -40,6 +42,34 @@ class AppState(
     // 读进来的课表先归一化：文件可能是手改的、也可能是旧版本写坏的
     var timetable by mutableStateOf((store.load() ?: defaultTimetable()).normalized())
         private set
+
+    private val prefs = UiPrefs(context)
+
+    /** 课表网格的行高（dp）。设置页可调，改了立刻写盘，下次启动沿用。 */
+    var gridRowHeightDp by mutableIntStateOf(
+        prefs.gridRowHeightDp.coerceIn(
+            UiPrefs.MIN_GRID_ROW_HEIGHT_DP,
+            UiPrefs.MAX_GRID_ROW_HEIGHT_DP,
+        )
+    )
+        private set
+
+    fun setGridRowHeight(dp: Int) {
+        val next = dp.coerceIn(UiPrefs.MIN_GRID_ROW_HEIGHT_DP, UiPrefs.MAX_GRID_ROW_HEIGHT_DP)
+        if (next == gridRowHeightDp) return
+        prefs.gridRowHeightDp = next
+        gridRowHeightDp = next
+    }
+
+    /** 上课前 12 分钟提醒的开关。真正的排期由 AppRoot 的 LaunchedEffect 负责。 */
+    var classReminderEnabled by mutableStateOf(prefs.classReminderEnabled)
+        private set
+
+    fun setClassReminder(enabled: Boolean) {
+        if (enabled == classReminderEnabled) return
+        prefs.classReminderEnabled = enabled
+        classReminderEnabled = enabled
+    }
 
     /** 课表页正在看第几周。 */
     var currentWeek by mutableStateOf(
@@ -111,11 +141,31 @@ class AppState(
         importError = null
     }
 
+    /**
+     * 把网页识别出来的一份课表按同样的规则写入：0 门课拒绝、不覆盖设置。
+     * 返回失败原因（成功为 null），供网页导入页决定是关页还是提示。
+     */
+    fun importParsed(parsed: ParseResult): String? =
+        when (val outcome = timetable.afterImport(parsed)) {
+            is ImportOutcome.Rejected -> outcome.reason
+            is ImportOutcome.Applied -> {
+                save(outcome.timetable)
+                null
+            }
+        }
+
     // ---------- 编辑 ----------
 
     fun addCourse(course: Course) = save(timetable.withCourseAdded(course))
 
     fun replaceCourse(index: Int, course: Course) = save(timetable.withCourseReplaced(index, course))
+
+    /** 只改高亮色，其它字段原样保留；null = 回到按课名自动。 */
+    fun setCourseColor(index: Int, color: Int?) {
+        val course = timetable.courses.getOrNull(index) ?: return
+        if (course.customColor == color) return
+        replaceCourse(index, course.copy(customColor = color))
+    }
 
     fun removeCourse(index: Int) = save(timetable.withCourseRemoved(index))
 

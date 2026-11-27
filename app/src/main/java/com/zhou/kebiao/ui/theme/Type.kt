@@ -2,7 +2,6 @@ package com.zhou.kebiao.ui.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
@@ -75,15 +74,6 @@ val TextMicroStrong = TextStyle(
     lineHeight = 11.sp,
     fontWeight = FontWeight.SemiBold,
     fontFeatureSettings = TABULAR,
-)
-
-/** 启动页那句小字：衬线 + 拉开字距。 */
-val TextTagline = TextStyle(
-    fontFamily = FontFamily.Serif,
-    fontSize = 14.sp,
-    lineHeight = 22.sp,
-    letterSpacing = 2.sp,
-    fontWeight = FontWeight.Normal,
 )
 
 /**

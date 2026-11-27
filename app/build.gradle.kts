@@ -30,8 +30,8 @@ android {
         // 每发一版都要把 versionCode 加 1：
         // 版本号倒退的包会被系统拒装（INSTALL_FAILED_VERSION_DOWNGRADE）。
         // 用同一张证书签的包才能覆盖升级、保住用户的课表数据。
-        versionCode = 3
-        versionName = "1.2"
+        versionCode = 4
+        versionName = "2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
